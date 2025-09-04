@@ -1,47 +1,128 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+<div>
+  <h1>Inventory</h1>
+  <br>
+  <form @submit.prevent="addProduct">
+    Product:
+    <input v-model="newProduct.name" type="text" placeholder="Product Name" required><br>
+    Quantity:
+    <input v-model="newProduct.quantity" type="number" placeholder="Quantity" required><br>
+    Price:
+    <input v-model="newProduct.price" type="number" placeholder="Price per Product" required><br>
+    <button type="submit">Add Product</button>
+  </form>
+  <ul>
+    <li v-for="(product, index) in products">
+      {{ product.name }} - stock left: {{ product.quantity }} for {{ product.price }}€ each
+    </li>
+  </ul>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
+  <h1>Process Order</h1>
+  <br>
+  <form @submit.prevent="processOrder">
+    Product
+    <select v-model="selectProductIndex">
+      <option value="" disabled>Select product</option>
+      <option v-for="(product, index) in products" :key="index" :value="index">{{ product.name }}</option>
+    </select><br>
+    Quantity:
+    <select v-model="selectQuantity">
+      <option value="" disabled>Select quantity</option>
+      <option v-for="n in availableQuantity" :key="n" :value="n">{{ n }}</option>
+    </select><br>
+    <button type="submit">Enter order</button>
+  </form>
 
-  <main>
-    <TheWelcome />
-  </main>
+  <div v-if="revenue > 0">
+    <h2>Revenue</h2><br>
+    <p>{{ revenue }}€</p>
+  </div>
+  <br>
+
+  <div v-if="outOfStock.length > 0">
+    <h2>Out of stock</h2>
+    <ul>
+      <li v-for="name in outOfStock">{{ name }}</li>
+    </ul>
+  </div>
+  
+</div>
 </template>
 
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+
+type Product = {
+  name: string
+  quantity: number
+  price: number
+}
+
+const products = ref<Product[]>([])
+const newProduct = ref<Product>({'name': '', 'quantity': 0, 'price': 0});
+const selectProductIndex = ref<number | ''>('');
+const selectQuantity = ref<number | ''>('');
+const revenue = ref<number>(0);
+const outOfStock = ref<string[]>([]);
+
+function addProduct() {
+  if (newProduct.value.name == '' || newProduct.value.quantity <= 0 || newProduct.value.price < 0) {
+    alert("Invalid input for new product");
+    return;
+  }
+  const productToAdd: Product = {
+    name: newProduct.value.name,
+    quantity: newProduct.value.quantity,
+    price: newProduct.value.price,
+  }
+  newProduct.value = {'name': '', 'quantity': 0, 'price': 0};
+  products.value.push(productToAdd);
+}
+
+const availableQuantity = computed(() => {
+  // return empty list if there are no products 
+  if (products.value.length === 0 || selectProductIndex.value === '') return [];
+  const product = products.value[selectProductIndex.value as number];
+  const available: number[] = [];
+  for (let i = 1; i <= product.quantity; i++) {
+    available.push(i);
+  }
+  return available;
+})
+
+function processOrder() {
+  // change the value in products of that product to decrease its quantity by the selected quantity
+  if (selectProductIndex.value === '' || selectQuantity.value === '') return;
+  const product = products.value[selectProductIndex.value as number];
+  product.quantity -= selectQuantity.value;
+
+  // compute revenue
+  revenue.value += product.price * selectQuantity.value;
+
+  // delete product if it has a quantity of 0
+  if (product.quantity === 0) {
+    if (!outOfStock.value.includes(product.name)) {
+      outOfStock.value.push(product.name);
+    }
+    products.value.splice(selectProductIndex.value, 1);
+  }
+
+  // reset input fields
+  selectProductIndex.value = '';
+  selectQuantity.value = '';
+
+  
+}
+
+
+
+</script>
+
 <style scoped>
-header {
-  line-height: 1.5;
+h1 {
+  margin-top: 1rem;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+form {
+  margin-bottom: 1rem;
 }
 </style>
