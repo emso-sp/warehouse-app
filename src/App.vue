@@ -50,16 +50,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import ProductService from './services/ProductService';
+import type { ProductDTO, ProductCreateDTO } from './models/types.ts';
 
-type Product = {
-  name: string
-  quantity: number
-  price: number
-}
-
-const products = ref<Product[]>([])
-const newProduct = ref<Product>({'name': '', 'quantity': 0, 'price': 0});
+const products = ref<ProductDTO[]>([])
+const newProduct = ref<ProductCreateDTO>({'name': '', 'quantity': 0, 'price': 0});
 const selectProductIndex = ref<number | ''>('');
 const selectQuantity = ref<number | ''>('');
 const revenue = ref<number>(0);
