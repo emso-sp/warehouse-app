@@ -82,6 +82,11 @@ async function addProduct() {
   newProduct.value = {'name': '', 'quantity': 0, 'price': 0};
 }
 
+async function updateProduct(product:ProductDTO) {
+  await ProductService.update(product.id, product);
+  await loadProducts();
+}
+
 async function deleteProduct(id:number) {
   await ProductService.delete(id);
   await loadProducts();
@@ -104,6 +109,7 @@ function processOrder() {
   if (selectProductIndex.value === '' || selectQuantity.value === '') return;
   const product = products.value[selectProductIndex.value as number];
   product.quantity -= selectQuantity.value;
+  updateProduct(product);
 
   // compute revenue
   revenue.value += product.price * selectQuantity.value;
