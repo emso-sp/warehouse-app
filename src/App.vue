@@ -61,18 +61,31 @@ const selectQuantity = ref<number | ''>('');
 const revenue = ref<number>(0);
 const outOfStock = ref<string[]>([]);
 
-function addProduct() {
+// when starting the app, all products are fetched from the database
+onMounted(() => {
+  loadProducts();
+});
+
+// asynchronous functions for calling backend
+async function loadProducts() {
+  const response = await ProductService.getAll();
+  products.value = response.data;
+}
+
+async function addProduct() {
   if (newProduct.value.name == '' || newProduct.value.quantity <= 0 || newProduct.value.price < 0) {
     alert("Invalid input for new product");
     return;
   }
-  const productToAdd: Product = {
-    name: newProduct.value.name,
-    quantity: newProduct.value.quantity,
-    price: newProduct.value.price,
-  }
+  await ProductService.create(newProduct.value);
+  await loadProducts();
   newProduct.value = {'name': '', 'quantity': 0, 'price': 0};
-  products.value.push(productToAdd);
+}
+
+async function deleteProduct(id:number) {
+  await ProductService.delete(id);
+  await loadProducts();
+  
 }
 
 const availableQuantity = computed(() => {
