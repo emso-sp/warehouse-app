@@ -116,10 +116,7 @@ function processOrder() {
 
   // delete product if it has a quantity of 0
   if (product.quantity === 0) {
-    if (!outOfStock.value.includes(product.name)) {
-      outOfStock.value.push(product.name);
-    }
-    products.value.splice(selectProductIndex.value, 1);
+    displayOutOfStock();
   }
 
   // reset input fields
@@ -127,6 +124,15 @@ function processOrder() {
   selectQuantity.value = '';
 
   
+}
+
+function displayOutOfStock() {
+  outOfStock.value = [];
+  products.value.forEach((product, index) => {
+    if (product.quantity === 0) {
+      outOfStock.value.push(product.name);
+    }
+  });
 }
 
 
