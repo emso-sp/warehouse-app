@@ -12,7 +12,7 @@
     <button type="submit">Add Product</button>
   </form>
   <ul>
-    <li v-for="(product, index) in products">
+    <li v-for="(product, index) in products.filter(p => p.quantity !== 0)" :key="product.id">
       {{ product.name }} - stock left: {{ product.quantity }} for {{ product.price }}€ each
     </li>
   </ul>
