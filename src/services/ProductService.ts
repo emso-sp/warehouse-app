@@ -13,7 +13,7 @@ export default {
     create(product: ProductCreateDTO) {
         return axios.post(API_URL, product);
     },
-    update(id: number, product: ProductCreateDTO) {
+    update(id: number, product: ProductDTO) {
         return axios.put(`${API_URL}/${id}`, product);
     },
     delete(id: number) {
