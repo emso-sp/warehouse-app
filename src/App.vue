@@ -45,6 +45,15 @@
       <li v-for="name in outOfStock">{{ name }}</li>
     </ul>
   </div>
+
+  <h1>Delete product from inventory</h1>
+  <form @submit.prevent="deleteProduct">
+    <select v-model="selectedProductID">
+      <option value="" disabled>Select product to delete</option>
+      <option v-for="product in products" :key="product.id" :value="product.id">{{ product.name }}</option>
+    </select><br>
+  <button type="submit">Delete product</button>
+  </form>
   
 </div>
 </template>
@@ -60,6 +69,7 @@ const selectProductIndex = ref<number | ''>('');
 const selectQuantity = ref<number | ''>('');
 const revenue = ref<number>(0);
 const outOfStock = ref<string[]>([]);
+const selectedProductID = ref<number | ''>('');
 
 // when starting the app, all products are fetched from the database
 onMounted(() => {
@@ -88,10 +98,14 @@ async function updateProduct(product:ProductDTO) {
   await loadProducts();
 }
 
-async function deleteProduct(id:number) {
-  await ProductService.delete(id);
+async function deleteProduct() {
+  if (selectedProductID.value === '') {
+    alert("Please select a product to be deleted.");
+    return;
+  }
+  await ProductService.delete(selectedProductID.value);
   await loadProducts();
-  
+  selectedProductID.value = '';
 }
 
 const availableQuantity = computed(() => {
