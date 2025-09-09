@@ -70,6 +70,7 @@ onMounted(() => {
 async function loadProducts() {
   const response = await ProductService.getAll();
   products.value = response.data;
+  displayOutOfStock();
 }
 
 async function addProduct() {
